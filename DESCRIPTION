@@ -1,6 +1,6 @@
-Package: Bioc2020RCWL
+Package: RcwlscRNAseq
 Type: Package
-Title: Bioconductor toolchain for usage and development of reproducible bioinformatics pipelines in CWL
+Title: Connecting Bioconductor to other bioinformatics tools using Rcwl - Application in scRNA-seq data
 Version: 0.1.5
 Authors@R: c(person("Qian", "Liu", role = c("aut", "cre"), email =
    "qian.liu@roswellpark.org", comment = c(ORCID = "0000-0003-1456-5099")),
@@ -23,7 +23,7 @@ Description: This workshop introduces the Bioconductor toolchain for
     alignment and quantification, DropletUtils for filtering raw
     gene-barcode matrix will demonstrate the typical use case of these
     two packages. More details for usage and examples are available on
-    Rcwl website(https://hubentu.github.io/Rcwl/). 
+    Rcwl website(https://rcwl.org/)
 Depends: R (>= 4.0.0), Rcwl, RcwlPipelines
 Imports: BiocParallel, shiny, DropletUtils
 Encoding: UTF-8
