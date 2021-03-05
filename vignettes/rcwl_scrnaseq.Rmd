@@ -24,7 +24,7 @@ knitr::opts_chunk$set(message = FALSE)
 ## Introduction
 
 Here we demonstrate a case study for scRNA-seq data preprocessing
-using `RcwlPipeline` tools and pipeline.
+using `RcwlPipelines` tools and pipeline.
 
 10x Genomics has its own preprocessing pipeline `Cell Ranger` to
 process the scRNA-seq outputs it produces to perform the
@@ -56,13 +56,13 @@ if (!requireNamespace("BiocManager", quietly = TRUE))
 BiocManager::install(c("Rcwl", "RcwlPipelines"))
 ```
 
-Or use the most updated version from GitHub:
+For this tutorial, please use the most updated version from GitHub:
 
 ```{r, eval=FALSE}
 BiocManager::install(c("rworkflow/Rcwl", "rworkflow/RcwlPipelines"))
 ```
 
-For this workshop, we also need to install some other packages: 
+Several other packages need to be installed also: 
 
 ```{r, eval=FALSE}
 BiocManager::install(c("git2r", "DropletUtils", "BiocParallel"))
@@ -156,12 +156,12 @@ mcols(tls)
 environment. Here we load all the 3 tools that will be needed for the
 scRNA-seq data preprocessing. The recipes for developing these tools
 can be found in the [GitHub
-repository](https://github.com/rworkflow/RcwlRecipes/tree/master/Rcwl)
+repository](https://github.com/rworkflow/RcwlRecipes/tree/dev/Rcwl)
 including
-[tl_STARindex](https://github.com/rworkflow/RcwlRecipes/blob/master/Rcwl/tl_STARindex.R),
-[tl_STARsolo](https://github.com/rworkflow/RcwlRecipes/blob/master/Rcwl/tl_STARsolo.R),
+[tl_STARindex](https://github.com/rworkflow/RcwlRecipes/blob/dev/Rcwl/tl_STARindex.R),
+[tl_STARsolo](https://github.com/rworkflow/RcwlRecipes/blob/dev/Rcwl/tl_STARsolo.R),
 and
-[tl_DropletUtils](https://github.com/rworkflow/RcwlRecipes/blob/master/Rcwl/tl_DropletUtils.R).
+[tl_DropletUtils](https://github.com/rworkflow/RcwlRecipes/blob/dev/Rcwl/tl_DropletUtils.R).
 
 
 ```{r}
@@ -198,7 +198,8 @@ STARindex$sjdbGTFfile <- file.path(path, "Homo_sapiens.GRCh37.75.21.gtf")
 ```
 
 ```{r, eval=FALSE}
-runCWL(cwl = STARindex, outdir = file.path(outpath, "STARindex_output"), docker = TRUE)
+res <- runCWL(cwl = STARindex, outdir = file.path(outpath, "STARindex_output"),
+              docker = TRUE, showLog = TRUE)
 ```
 
 ```{r}
@@ -233,7 +234,8 @@ STARsolo$whiteList <- cblist
 STARsolo$genomeDir <- genomeDir
 ```
 ```{r, eval=FALSE}
-runCWL(STARsolo, outdir = file.path(outpath, "STARsolo_output"))
+res <- runCWL(STARsolo, outdir = file.path(outpath, "STARsolo_output"),
+              docker = TRUE, showLog = TRUE)
 ```
 
 ```{r}
@@ -262,7 +264,7 @@ it's ready to be wrapped as an `Rcwl` tools for execution.
 For example, in wrapping the _Bioconductor_ package
 [DropletUtils](https://bioconductor.org/packages/DropletUtils/)
 functionalities, we wrote this `Rcwl` tool called
-[tl_DropletUtils](https://github.com/rworkflow/RcwlRecipes/blob/master/Rcwl/tl_DropletUtils.R)
+[tl_DropletUtils](https://github.com/rworkflow/RcwlRecipes/blob/dev/Rcwl/tl_DropletUtils.R)
 with 3 major steps: 1) use the `read10xCounts` function to read the
 raw aligned files and convert into a `SingleCellExperiment` object. 2)
 calculate the barcode ranks and plotting. 3) calculate the empty
@@ -278,7 +280,8 @@ DropletUtils$df <- 5
 ```
 
 ```{r, eval=FALSE}
-runCWL(DropletUtils, outdir = file.path(outpath, "dropletUtils_output"), showLog = FALSE)
+res <- runCWL(DropletUtils, outdir = file.path(outpath, "dropletUtils_output"),
+              docker = TRUE, showLog = TRUE)
 ```
 
 ```{r}
@@ -313,7 +316,7 @@ sce
 
 Alternatively and more easily, we can use the pipeline called
 `pl_STARsoloDropletUtils` (recipe
-[here](https://github.com/rworkflow/RcwlRecipes/blob/master/Rcwl/pl_STARsoloDropletUtils.R))
+[here](https://github.com/rworkflow/RcwlRecipes/blob/dev/Rcwl/pl_STARsoloDropletUtils.R)
 for the scRNA-seq data preprocessing. This pipeline integrated the
 `STARsolo` and `DropletUtils` for a streamlined preprocessing analysis
 within _R_. It is included in `RcwlPipelines` and is ready to be
@@ -346,7 +349,8 @@ STARsoloDropletUtils$runThreadN <- 1
 ```
 
 ```{r, eval=FALSE}
-runCWL(STARsoloDropletUtils, outdir = file.path(outpath, "scpipeline_output"))
+res <- runCWL(STARsoloDropletUtils, outdir = file.path(outpath, "scpipeline_output"),
+              docker = TRUE, showLog = TRUE)
 ```
 
 The overall output of the pipeline was pre-defined to glob the
@@ -410,7 +414,8 @@ param_lst <- list(whiteList = cblist,
 res <- runCWLBatch(cwl = STARsolo,
                    outdir = file.path(outpath, "STARsolo_batch_output"),
                    inputList = input_lst, paramList = param_lst, 
-                   BPPARAM = bpparam)
+                   BPPARAM = bpparam,
+                   docker = TRUE, showLog = TRUE)
 ```
 
 The results are saved in separate folders for each parallel sample. 
@@ -441,7 +446,6 @@ knitr::include_graphics("cwlShiny_STARsolo.png")
 ```{r}
 sessionInfo()
 ```
-
 
 ## Links
 
