@@ -36,8 +36,8 @@ Workshop materials can be found here: http://rcwl.org/Rcwl_scRNAseq/
 In order to run the workshop successfully, users need to do either of
 the following:
 
-1. Install docker.
-2. Install needed tools: STAR. 
+1. Install [docker](https://docs.docker.com/get-docker/).
+2. Install needed tools: [STAR](https://github.com/alexdobin/STAR/releases/tag/2.7.3a). 
 
 Users also need to install the following packages: 
 
