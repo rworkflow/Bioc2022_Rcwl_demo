@@ -292,7 +292,7 @@ Now that we get 2 output files:
    figure, please refer to the [DropletUtils
    vignette](https://bioconductor.org/packages/release/bioc/vignettes/DropletUtils/inst/doc/DropletUtils.html).
 
-```{r fig1, fig.show = "hold", out.width = "80%", echo = FALSE}
+```{r fig1, fig.show = "hold", out.width = "60%", echo = FALSE}
 knitr::include_graphics("diag1.png")
 knitr::include_graphics("diag2.png")
 ```
@@ -323,13 +323,13 @@ customized for your own research. Pipelines can be visualized by the
 ```{r}
 STARsoloDropletUtils <- cwlLoad("pl_STARsoloDropletUtils")
 ```
-```{r}
+```{r, warning=FALSE}
 plotCWL(STARsoloDropletUtils)
 ```
 
-```{r fig2, fig.show = "workflow", out.width = "100%", echo = FALSE}
-knitr::include_graphics("workflow.png")
-```
+<!-- ```{r fig2, fig.show = "workflow", out.width = "100%", echo = FALSE} -->
+<!-- knitr::include_graphics("workflow.png") -->
+<!-- ``` -->
 
 For `Rcwl` pipelines, we only need to assign input values for the
 whole pipeline, not individual tools involved. The input and output

@@ -303,7 +303,7 @@
 <ol style="list-style-type: decimal">
 <li>The pdf file with 2 diagnostic figures: Barcode ranks, and empty droplets. For details regarding interpretation of each diagnostic figure, please refer to the <a href="https://bioconductor.org/packages/release/bioc/vignettes/DropletUtils/inst/doc/DropletUtils.html">DropletUtils vignette</a>.</li>
 </ol>
-<p><img src="diag1.png" width="80%"><img src="diag2.png" width="80%"></p>
+<p><img src="diag1.png" width="60%"><img src="diag2.png" width="60%"></p>
 <div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">Biobase</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/Biobase/man/openPDF.html">openPDF</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">outpath</span>, <span class="st">"dropletUtils_output/diagnostics.pdf"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <ol start="2" style="list-style-type: decimal">
@@ -332,12 +332,9 @@
 <code class="sourceCode R"><span class="va">STARsoloDropletUtils</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/RcwlPipelines/man/cwlLoad.html">cwlLoad</a></span><span class="op">(</span><span class="st">"pl_STARsoloDropletUtils"</span><span class="op">)</span></code></pre></div>
 <div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/Rcwl/man/plotCWL.html">plotCWL</a></span><span class="op">(</span><span class="va">STARsoloDropletUtils</span><span class="op">)</span></code></pre></div>
-<pre><code>## Warning: The `x` argument of `as_tibble.matrix()` must have unique column names if `.name_repair` is omitted as of tibble 2.0.0.
-## Using compatibility `.name_repair`.</code></pre>
-<div id="htmlwidget-7a412cb4b50a6ccea749" style="width:700px;height:432.632880098888px;" class="grViz html-widget"></div>
-<script type="application/json" data-for="htmlwidget-7a412cb4b50a6ccea749">{"x":{"diagram":"digraph {\n\ngraph [layout = \"neato\",\n       outputorder = \"edgesfirst\",\n       bgcolor = \"white\"]\n\nnode [fontname = \"Helvetica\",\n      fontsize = \"10\",\n      shape = \"circle\",\n      fixedsize = \"true\",\n      width = \"0.5\",\n      style = \"filled\",\n      fillcolor = \"aliceblue\",\n      color = \"gray70\",\n      fontcolor = \"gray50\"]\n\nedge [fontname = \"Helvetica\",\n     fontsize = \"8\",\n     len = \"1.5\",\n     color = \"gray80\",\n     arrowsize = \"0.5\"]\n\n  \"1\" [label = \"fastq_cdna\", shape = \"rectangle\", fillcolor = \"#F0F8FF\", fontcolor = \"#000000\", pos = \"0,5!\"] \n  \"2\" [label = \"fastq_cb\", shape = \"rectangle\", fillcolor = \"#F0F8FF\", fontcolor = \"#000000\", pos = \"1,5!\"] \n  \"3\" [label = \"genomeDir\", shape = \"rectangle\", fillcolor = \"#F0F8FF\", fontcolor = \"#000000\", pos = \"2,5!\"] \n  \"4\" [label = \"whiteList\", shape = \"rectangle\", fillcolor = \"#F0F8FF\", fontcolor = \"#000000\", pos = \"3,5!\"] \n  \"5\" [label = \"runThreadN\", shape = \"rectangle\", fillcolor = \"#F0F8FF\", fontcolor = \"#000000\", pos = \"4,5!\"] \n  \"6\" [label = \"sam\", shape = \"circle\", fillcolor = \"#F0F8FF\", fontcolor = \"#000000\", pos = \"1.5,3!\"] \n  \"7\" [label = \"Solo\", shape = \"circle\", fillcolor = \"#F0F8FF\", fontcolor = \"#000000\", pos = \"2.5,3!\"] \n  \"8\" [label = \"sce\", shape = \"circle\", fillcolor = \"#F0F8FF\", fontcolor = \"#000000\", pos = \"2,1!\"] \n  \"9\" [label = \"plots\", shape = \"circle\", fillcolor = \"#F0F8FF\", fontcolor = \"#000000\", pos = \"3,1!\"] \n  \"10\" [label = \"STARsolo\", shape = \"diamond\", fillcolor = \"#F0F8FF\", fontcolor = \"#000000\", pos = \"2,4!\"] \n  \"11\" [label = \"DropletUtils\", shape = \"diamond\", fillcolor = \"#F0F8FF\", fontcolor = \"#000000\", pos = \"2.5,2!\"] \n  \"1\"->\"10\" \n  \"2\"->\"10\" \n  \"3\"->\"10\" \n  \"4\"->\"10\" \n  \"5\"->\"10\" \n  \"10\"->\"6\" \n  \"10\"->\"7\" \n  \"7\"->\"11\" \n  \"11\"->\"9\" \n  \"11\"->\"8\" \n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script><p><img src="workflow.png" width="100%"></p>
-<p>For <code>Rcwl</code> pipelines, we only need to assign input values for the whole pipeline, not individual tools involved. The input and output between each step are pre-defined in the pipeline to ensure a smooth passing.</p>
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<div id="htmlwidget-cbbb00076028495554ac" style="width:700px;height:432.632880098888px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-cbbb00076028495554ac">{"x":{"diagram":"digraph {\n\ngraph [layout = \"neato\",\n       outputorder = \"edgesfirst\",\n       bgcolor = \"white\"]\n\nnode [fontname = \"Helvetica\",\n      fontsize = \"10\",\n      shape = \"circle\",\n      fixedsize = \"true\",\n      width = \"0.5\",\n      style = \"filled\",\n      fillcolor = \"aliceblue\",\n      color = \"gray70\",\n      fontcolor = \"gray50\"]\n\nedge [fontname = \"Helvetica\",\n     fontsize = \"8\",\n     len = \"1.5\",\n     color = \"gray80\",\n     arrowsize = \"0.5\"]\n\n  \"1\" [label = \"fastq_cdna\", shape = \"rectangle\", fillcolor = \"#F0F8FF\", fontcolor = \"#000000\", pos = \"0,5!\"] \n  \"2\" [label = \"fastq_cb\", shape = \"rectangle\", fillcolor = \"#F0F8FF\", fontcolor = \"#000000\", pos = \"1,5!\"] \n  \"3\" [label = \"genomeDir\", shape = \"rectangle\", fillcolor = \"#F0F8FF\", fontcolor = \"#000000\", pos = \"2,5!\"] \n  \"4\" [label = \"whiteList\", shape = \"rectangle\", fillcolor = \"#F0F8FF\", fontcolor = \"#000000\", pos = \"3,5!\"] \n  \"5\" [label = \"runThreadN\", shape = \"rectangle\", fillcolor = \"#F0F8FF\", fontcolor = \"#000000\", pos = \"4,5!\"] \n  \"6\" [label = \"sam\", shape = \"circle\", fillcolor = \"#F0F8FF\", fontcolor = \"#000000\", pos = \"1.5,3!\"] \n  \"7\" [label = \"Solo\", shape = \"circle\", fillcolor = \"#F0F8FF\", fontcolor = \"#000000\", pos = \"2.5,3!\"] \n  \"8\" [label = \"sce\", shape = \"circle\", fillcolor = \"#F0F8FF\", fontcolor = \"#000000\", pos = \"2,1!\"] \n  \"9\" [label = \"plots\", shape = \"circle\", fillcolor = \"#F0F8FF\", fontcolor = \"#000000\", pos = \"3,1!\"] \n  \"10\" [label = \"STARsolo\", shape = \"diamond\", fillcolor = \"#F0F8FF\", fontcolor = \"#000000\", pos = \"2,4!\"] \n  \"11\" [label = \"DropletUtils\", shape = \"diamond\", fillcolor = \"#F0F8FF\", fontcolor = \"#000000\", pos = \"2.5,2!\"] \n  \"1\"->\"10\" \n  \"2\"->\"10\" \n  \"3\"->\"10\" \n  \"4\"->\"10\" \n  \"5\"->\"10\" \n  \"10\"->\"6\" \n  \"10\"->\"7\" \n  \"7\"->\"11\" \n  \"11\"->\"9\" \n  \"11\"->\"8\" \n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script><!-- ```{r fig2, fig.show = "workflow", out.width = "100%", echo = FALSE} --><!-- knitr::include_graphics("workflow.png") --><!-- ``` --><p>For <code>Rcwl</code> pipelines, we only need to assign input values for the whole pipeline, not individual tools involved. The input and output between each step are pre-defined in the pipeline to ensure a smooth passing.</p>
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/Rcwl/man/cwlProcess-methods.html">inputs</a></span><span class="op">(</span><span class="va">STARsoloDropletUtils</span><span class="op">)</span></code></pre></div>
 <pre><code>## inputs:
 ##   fastq_cdna (File[]):  
@@ -345,16 +342,16 @@
 ##   genomeDir (Directory):  
 ##   whiteList (File):  
 ##   runThreadN (int):</code></pre>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">STARsoloDropletUtils</span><span class="op">$</span><span class="va">fastq_cdna</span> <span class="op">&lt;-</span> <span class="va">cdna.fastq</span>
 <span class="va">STARsoloDropletUtils</span><span class="op">$</span><span class="va">fastq_cb</span> <span class="op">&lt;-</span> <span class="va">cb.fastq</span>
 <span class="va">STARsoloDropletUtils</span><span class="op">$</span><span class="va">genomeDir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">outpath</span>, <span class="st">"STARindex_output/STARindex"</span><span class="op">)</span>
 <span class="va">STARsoloDropletUtils</span><span class="op">$</span><span class="va">whiteList</span> <span class="op">&lt;-</span> <span class="va">cblist</span>
 <span class="va">STARsoloDropletUtils</span><span class="op">$</span><span class="va">runThreadN</span> <span class="op">&lt;-</span> <span class="fl">1</span></code></pre></div>
-<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/Rcwl/man/runCWL.html">runCWL</a></span><span class="op">(</span><span class="va">STARsoloDropletUtils</span>, outdir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">outpath</span>, <span class="st">"scpipeline_output"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p>The overall output of the pipeline was pre-defined to glob the important files from separate steps.</p>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/Rcwl/man/cwlProcess-methods.html">outputs</a></span><span class="op">(</span><span class="va">STARsoloDropletUtils</span><span class="op">)</span></code></pre></div>
 <pre><code>## outputs:
 ## sam:
@@ -369,7 +366,7 @@
 ## plots:
 ##   type: File
 ##   outputSource: DropletUtils/plots</code></pre>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/list.files.html">dir</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">outpath</span>, <span class="st">"scpipeline_output"</span><span class="op">)</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 <pre><code>##  [1] "Aligned.out.sam"                     "diagnostics.pdf"                    
 ##  [3] "sce_filtered.rds"                    "Solo.out/Barcodes.stats"            
@@ -385,15 +382,15 @@
 </h3>
 <p>Powered by <code>BiocParallel</code>,<code>Rcwl</code> supports parallel job running for multiple samples using the <code>runCWLBatch</code> function. The following example demonstrates how to do the parallel alignment for the 2 samples using the <code>STARsolo</code> tool.</p>
 <p>The <code>BPPARAM</code> argument in <code><a href="https://rdrr.io/pkg/Rcwl/man/runCWLBatch.html">runCWLBatch()</a></code> defines the parallel parameters. It can be defined by <code><a href="https://rdrr.io/pkg/BiocParallel/man/BatchtoolsParam-class.html">BiocParallel::BatchtoolsParam</a></code> function, where the <code>cluster</code> argument takes different values for different cluster job manager, such as “multicore”, “sge” and “slurm”. More details about available options can be checked by <code><a href="https://rdrr.io/pkg/BiocParallel/man/BatchtoolsParam-class.html">?BiocParallel::BatchtoolsParam</a></code>.</p>
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Bioconductor/BiocParallel">BiocParallel</a></span><span class="op">)</span></code></pre></div>
-<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">bpparam</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/BatchtoolsParam-class.html">BatchtoolsParam</a></span><span class="op">(</span>workers <span class="op">=</span> <span class="fl">2</span>, cluster <span class="op">=</span> <span class="st">"sge"</span>,
                            template <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/BatchtoolsParam-class.html">batchtoolsTemplate</a></span><span class="op">(</span><span class="st">"sge"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p>In the following example, we are using “multicore” for the parallel running.</p>
 <p>The <code>inputList</code> argument is required to be a list of input parameter values for samples that are to be computed parallelly. <strong>NOTE</strong> that the names of the list must be consistent with the ids of input parameters. In this example, the names are <code>readFilesIn_cdna</code> and <code>readFilesIn_cb</code>.</p>
 <p>The <code>paramList</code> argument is required to be a list of input parameter values that are to be shared for all parallelly running samples.</p>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">bpparam</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/BatchtoolsParam-class.html">BatchtoolsParam</a></span><span class="op">(</span>workers <span class="op">=</span> <span class="fl">2</span>, cluster <span class="op">=</span> <span class="st">"multicore"</span><span class="op">)</span>
 <span class="va">input_lst</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>readFilesIn_cdna <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>
                       sample1 <span class="op">=</span> <span class="va">cdna.fastq</span>,
@@ -405,13 +402,13 @@
 <span class="va">param_lst</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>whiteList <span class="op">=</span> <span class="va">cblist</span>,
                   genomeDir <span class="op">=</span> <span class="va">genomeDir</span>,
                   runThreadN <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></code></pre></div>
-<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Rcwl/man/runCWLBatch.html">runCWLBatch</a></span><span class="op">(</span>cwl <span class="op">=</span> <span class="va">STARsolo</span>,
                    outdir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">outpath</span>, <span class="st">"STARsolo_batch_output"</span><span class="op">)</span>,
                    inputList <span class="op">=</span> <span class="va">input_lst</span>, paramList <span class="op">=</span> <span class="va">param_lst</span>, 
                    BPPARAM <span class="op">=</span> <span class="va">bpparam</span><span class="op">)</span></code></pre></div>
 <p>The results are saved in separate folders for each parallel sample.</p>
-<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/list.files.html">dir</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">outpath</span>, <span class="st">"STARsolo_batch_output"</span><span class="op">)</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>  <span class="co">## output files</span></code></pre></div>
 <pre><code>##  [1] "sample1/Aligned.out.sam"                    
 ##  [2] "sample1/Log.final.out"                      
@@ -448,7 +445,7 @@
 <h3 class="hasAnchor">
 <a href="#shiny-interface" class="anchor"></a>Shiny interface</h3>
 <p><code><a href="https://rdrr.io/pkg/Rcwl/man/cwlShiny.html">cwlShiny()</a></code> opens a user-friendly shiny interface for running any <code>Rcwl</code> tools or pipelines. By default, users need to put in the absolute file path for each input parameter. <strong>NOTE</strong>, multiple file paths need to be separated by colon. Click the <code>run</code> button, it will start running and return the output file paths under <code>Output</code> tag. Users can also check the <code>Command</code> and <code>Log</code> in the shiny interface page.</p>
-<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/Rcwl/man/cwlShiny.html">cwlShiny</a></span><span class="op">(</span><span class="va">STARsolo</span><span class="op">)</span></code></pre></div>
 <p><img src="cwlShiny_STARsolo.png" width="100%"></p>
 </div>
@@ -456,7 +453,7 @@
 <div id="sessioninfo" class="section level2">
 <h2 class="hasAnchor">
 <a href="#sessioninfo" class="anchor"></a>SessionInfo</h2>
-<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>## R version 4.0.3 (2020-10-10)
 ## Platform: x86_64-apple-darwin13.4.0 (64-bit)
