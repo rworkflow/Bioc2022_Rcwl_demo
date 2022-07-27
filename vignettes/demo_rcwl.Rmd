@@ -301,8 +301,7 @@ file and diagnostic figures pdf file.
 cwlSearch("counts2sce")  ## need to load the Bioconductor package: DropletUtils
 counts2sce <- cwlLoad("tl_counts2sce")
 inputs(counts2sce)
-counts2sce$dirname <- file.path("~/workspace/STARsolo_output/Solo.out")
-## counts2sce$dirname <- file.path(outpath, "STARsolo_output/Solo.out")
+counts2sce$dirname <- file.path(outpath, "STARsolo_output/Solo.out")
 ```
 
 ```{r, eval=FALSE}
@@ -313,15 +312,19 @@ res <- runCWL(counts2sce, outdir = file.path(outpath, "counts2sce_output"),
 ```{r}
 dir(file.path(outpath, "counts2sce_output"))
 sce <- readRDS(res$output)
+sce
 ```
 
 ```{r}
+cwlSearch("STARsolo2sce")
+STARsolo2sce <- cwlLoad("pl_STARsolo2sce")
 inputs(STARsolo2sce)
-STARsolo2sce$readFilesIn_cdna <- cdna.fastq
-STARsolo2sce$readFilesIn_cb <- cb.fastq
+STARsolo2sce$fastq_cdna <- cdna.fastq
+STARsolo2sce$fastq_cb <- cb.fastq
 STARsolo2sce$whiteList <- cblist
-STARsolo2sce$genomeDir <- "~/workspace/STARindex_output"
+STARsolo2sce$genomeDir <- genomeDir
 STARsolo2sce$soloCellFilter <- "EmptyDrops_CR"
+STARsolo2sce$runThreadN <- 4
 
 res <- runCWL(STARsolo2sce, outdir = file.path(outpath, "STARsolo2sce_output"),
               docker = TRUE, showLog = TRUE)
@@ -379,10 +382,6 @@ and proceed with any downstream exploratory analysis.
 sce <- readRDS(file.path(outpath, "dropletUtils_output/counts_sce.rds"))
 sce
 ```
-
-
-
-
 
 ### scRNA-seq preprocessing pipeline
 
