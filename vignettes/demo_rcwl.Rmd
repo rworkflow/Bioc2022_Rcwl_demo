@@ -37,12 +37,16 @@ configuration to run and is significantly slower than other mappers.
 
 In this case study,
 [STARsolo](https://github.com/alexdobin/STAR/blob/master/docs/STARsolo.md)
-is used for alignment, quantification, which produces a count matrix
-from FASTQ. From STAR 2.7.8a, it also incorporated the cell filtering
+is used for alignment, quantification, and filtering which produces a
+high-quality count matrix from FASTQ. 
+
+Note that from STAR 2.7.8a, it also incorporated the cell filtering
 (calling) function similar to `CellRanger`, which filters raw
 gene-barcode matrix to select a subset of cells that are likely to be
 "real" cells as opposed to empty droplets and produces a high-quality
-count matrix. Before these, a one-time indexing step using
+count matrix. 
+
+Before alignment, a one-time indexing step using
 [STARindex](https://hbctraining.github.io/Intro-to-rnaseq-hpc-O2/lessons/03_alignment.html)
 is also included in this case study.
 
@@ -58,7 +62,6 @@ The package can be installed from Bioconductor (>= 3.9):
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 BiocManager::install(c("Rcwl", "RcwlPipelines"))
-BiocManager::install("DropletUtils")
 ```
 
 Several other packages need to be installed also: 
@@ -87,7 +90,8 @@ for demo purpose only so that the execution of the Rcwl scRNA-seq
 preprocessing tools or pipeline in R can be completed within 1~2
 minutes.
 
-The "*.fastq" data was curated to only include reads on chromosome 21.
+The data are further curated ("*.fastq") to only include reads on
+chromosome 21.
 
 “subset15_demo_barcode.txt” contains known cell barcodes for mapping
 and only 15 barcodes are included.
@@ -150,9 +154,8 @@ mcols(tls)
 ```
 
 `cwlLoad` loads the `Rcwl` tool/pipeline into the _R_ working
-environment. Here we load all the 3 tools that will be needed for the
-scRNA-seq data preprocessing. The recipes for developing these tools
-can be found in the [GitHub
+environment. The recipes for developing these tools can be found in
+the [GitHub
 repository](https://github.com/rworkflow/RcwlRecipes/tree/dev/Rcwl)
 including
 [tl_STARindex](https://github.com/rworkflow/RcwlRecipes/blob/dev/Rcwl/tl_STARindex.R)
@@ -162,7 +165,9 @@ and
 
 ```{r}
 STARindex <- cwlLoad("tl_STARindex")
-## STARindex <- cwlLoad(mcols(tls)$fpath[2]) ## equivalent
+STARindex
+inputs(STARindex)
+baseCommand(STARindex)
 ```
 
 ## scRNA-seq preprocessing
@@ -214,11 +219,9 @@ privileges.
 ### Alignment, demultiplexing and quantification
 
 Then we STARsolo to map, demultiplex and quantify the indexed scRNAseq
-data. Since [STAR
+data. As I mentioned earlier, Since [STAR
 2.7.8a](https://github.com/alexdobin/STAR/blob/master/docs/STARsolo.md),
-STARsolo performs cell filtering (a.k.a. cell calling), which aims to
-select a subset of cells that are likely to be "real" cells as opposed
-to empty droplets (containing ambient RNA).
+STARsolo performs cell filtering (a.k.a. cell calling) to remove low-quality cells, such as empty droplets (containing ambient RNA).
 
 First load the tool:
 
@@ -317,14 +320,11 @@ easily, we can use the pipeline called `pl_STARsolo2sce` (recipe
 for the scRNA-seq data preprocessing. This pipeline integrated the
 `STARsolo` and `DropletUtils` (Bioc package) for a streamlined
 preprocessing analysis within _R_. It is included in `RcwlPipelines`
-and is ready to be customized for your own research. Pipelines can be
-visualized by the `plotCWL` function.
+and is ready to be customized for your own research. 
 
 ```{r}
+cwlSearch("STARsolo2sce")
 STARsolo2sce <- cwlLoad("pl_STARsolo2sce")
-```
-```{r, warning=FALSE}
-plotCWL(STARsolo2sce)
 ```
 
 For `Rcwl` pipelines, we only need to assign input values for the
@@ -333,8 +333,6 @@ between each step are pre-defined in the pipeline to ensure a smooth
 passing. 
 
 ```{r}
-cwlSearch("STARsolo2sce")
-STARsolo2sce <- cwlLoad("pl_STARsolo2sce")
 inputs(STARsolo2sce)
 STARsolo2sce$fastq_cdna <- cdna.fastq
 STARsolo2sce$fastq_cb <- cb.fastq
@@ -357,7 +355,7 @@ cwlVersion(STARsolo)
 baseCommand(STARsolo)
 requirements(STARsolo)
 requirements(STARsolo2sce, step = "STARsolo")
-arguments(STARsolo)
+arguments(STARsolo)  ## hidden arguments can be changed
 inputs(STARsolo)
 ```
 
@@ -368,12 +366,6 @@ star_v <- searchContainer("STAR")
 requirements(STARsolo2sce, step = "STARsolo")
 requirements(STARsolo2sce, "STARsolo") <- list(requireDocker(star_v$container[2]))
 requirements(STARsolo2sce, step = "STARsolo")
-```
-
-Change default argument values: 
-
-```{r}
-arguments(STARsolo)
 ```
 
 # Rcwl: Build `Rcwl` tools
