@@ -33,16 +33,16 @@ configuration to run and is significantly slower than other mappers.
 
 In this case study,
 [STARsolo](https://github.com/alexdobin/STAR/blob/master/docs/STARsolo.md)
-is used for alignment and quantification, which produces a count
-matrix from FASTQ.
-[DropletUtils](https://bioconductor.org/packages/DropletUtils/) is
-used for filtering raw gene-barcode matrix and removing empty
-droplets, which produces a high-quality count matrix with feature/cell
-annotation files saved in an _R_ object of `SingleCellExperiment`.
-Before these, a one-time indexing step using
+is used for alignment, quantification, which produces a count matrix
+from FASTQ. From STAR 2.7.8a, it also incorporated the cell filtering
+(calling) function similar to `CellRanger`, which filters raw
+gene-barcode matrix to select a subset of cells that are likely to be
+"real" cells as opposed to empty droplets and produces a high-quality
+count matrix. Before these, a one-time indexing step using
 [STARindex](https://hbctraining.github.io/Intro-to-rnaseq-hpc-O2/lessons/03_alignment.html)
 is also included in this case study.
-	
+
+
 ## Install packages
 
 If this is the first time you use `Rcwl` or `RcwlPipelines`, you need
@@ -54,6 +54,7 @@ The package can be installed from Bioconductor (>= 3.9):
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 BiocManager::install(c("Rcwl", "RcwlPipelines"))
+BiocManager::install("DropletUtils")
 ```
 
 For this tutorial, please use the most updated version from GitHub:
@@ -133,9 +134,6 @@ available tool or pipeline.  The recipes will be locally cached, so
 users don't need to call `cwlUpdate` every time unless they want to
 use a tool/pipeline that is newly added to `RcwlPipelines`. 
 
-In this example, we are using the Bioc 3.13 which is the current devel
-version.
-
 ```{r}
 atls <- cwlUpdate(branch = "dev") ## sync the tools/pipelines. 
 atls
@@ -158,18 +156,14 @@ scRNA-seq data preprocessing. The recipes for developing these tools
 can be found in the [GitHub
 repository](https://github.com/rworkflow/RcwlRecipes/tree/dev/Rcwl)
 including
-[tl_STARindex](https://github.com/rworkflow/RcwlRecipes/blob/dev/Rcwl/tl_STARindex.R),
-[tl_STARsolo](https://github.com/rworkflow/RcwlRecipes/blob/dev/Rcwl/tl_STARsolo.R),
+[tl_STARindex](https://github.com/rworkflow/RcwlRecipes/blob/dev/Rcwl/tl_STARindex.R)
 and
-[tl_DropletUtils](https://github.com/rworkflow/RcwlRecipes/blob/dev/Rcwl/tl_DropletUtils.R).
+[tl_STARsolo](https://github.com/rworkflow/RcwlRecipes/blob/dev/Rcwl/tl_STARsolo.R).
 
 
 ```{r}
-STARindex <- cwlLoad(title(tls)[2])  ## "tl_STARindex"
-## equivalent:
-## STARindex <- cwlLoad(mcols(tls)$fpath[2])
-STARsolo <- cwlLoad("tl_STARsolo")
-DropletUtils <- cwlLoad("tl_DropletUtils")
+STARindex <- cwlLoad("tl_STARindex")
+## STARindex <- cwlLoad(mcols(tls)$fpath[2]) ## equivalent
 ```
 
 ## scRNA-seq preprocessing
@@ -217,7 +211,16 @@ singularity.
 4. "udocker" for the docker-like runtime without any administrator
 privileges.
 
-### Alignment
+### Alignment, demultiplexing and quantification
+
+Then we STARsolo to map, demultiplex and quantify the indexed scRNAseq data. 
+
+Load the tool: 
+
+```{r}
+cwlSearch(c("STAR", "solo"))
+STARsolo <- cwlLoad("tl_STARsolo")
+```
 
 Assign values to input parameters:
 
@@ -232,18 +235,30 @@ STARsolo$readFilesIn_cdna <- cdna.fastq
 STARsolo$readFilesIn_cb <- cb.fastq
 STARsolo$whiteList <- cblist
 STARsolo$genomeDir <- genomeDir
+STARsolo$soloCellFilter <- "EmptyDrops_CR"
 ```
 ```{r, eval=FALSE}
 res <- runCWL(STARsolo, outdir = file.path(outpath, "STARsolo_output"),
               docker = TRUE, showLog = TRUE)
 ```
 
+Now let's check all the output files generated in the "STARsolo_output" folder, which are ready to be passed into the next analysis steps. A summary table is generated for filtered cells ("Summary.csv"), which is similar to CellRanger's summary and is useful for Quality Control.
+
 ```{r}
 dir(file.path(outpath, "STARsolo_output"), recursive = TRUE)
+read.csv(file.path(outpath, "STARsolo_output/Solo.out/Gene/Summary.csv"))
 ```
 
-The output files generated in the "STARsolo_output" folder can now be
-passed into the next tool for QC.
+### Import data into R 
+
+We then load the data into R environment in `singlecellExperiment` format. 
+
+```{r}
+library(DropletUtils)
+sce <- read10xCounts(file.path(outpath, "STARsolo_output/Solo.out/Gene/filtered"))
+```
+
+
 
 ### Count filtering
 
