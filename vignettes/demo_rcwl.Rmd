@@ -261,41 +261,15 @@ dir(file.path(outpath, "STARsolo_output"), recursive = TRUE)
 read.csv(file.path(outpath, "STARsolo_output/Solo.out/Gene/Summary.csv"))
 ```
 
-<!-- ## Import data into R  -->
-
-<!-- After the scRNAseq data preprocessing steps are done, We can load the -->
-<!-- result data into R environment in `singlecellExperiment` format, and -->
-<!-- proceed with any downstream data exploration. -->
-
-<!-- ```{r} -->
-<!-- library(DropletUtils) -->
-<!-- sce <- read10xCounts(file.path(outpath, "STARsolo_output/Solo.out/Gene/filtered")) -->
-<!-- sce -->
-<!-- ``` -->
-
 ### Import count data into R
 
-`Rcwl` it support the integration of _R_ packages or _R_ functions as
-a CWL tool or pipeline, which was not intrinsically supported when
-directly using CWL. this is a unique feature for `Rcwl`, where we can
-easily connect the upstream data preprocessing steps (previously based
-on command line tools) and the downstream data analysis steps (heavily
-done in _R/Bioconductor_).
-
-The idea here is to put anything you need into a user-defined _R_
-function, with specified arguments for input and output files, then
-it's ready to be wrapped as an `Rcwl` tools for execution.
-
-You can refer to this `Rcwl` tool called
-[tl_DropletUtils](https://github.com/rworkflow/RcwlRecipes/blob/dev/Rcwl/tl_DropletUtils.R)
-as an example, where it wrapped the _Bioconductor_ package
+Here we use the `Rcwl` tool called
+[tl_counts2sce](https://github.com/rworkflow/RcwlRecipes/blob/dev/Rcwl/tl_counts2sce.R)
+, which wraps the _Bioconductor_ package
 [DropletUtils](https://bioconductor.org/packages/DropletUtils/)
-functionalities, with 3 major steps: 1) use the `read10xCounts`
-function to read the raw aligned files and convert into a
-`SingleCellExperiment` object. 2) calculate the barcode ranks and
-plotting. 3) calculate the empty droplets and plotting. We have also
-defined the tool output to collect the `SingleCellExperiment` Rdata
-file and diagnostic figures pdf file.
+functionalities and use the `read10xCounts` function to read the
+aligned and filtered files and convert into a `SingleCellExperiment`
+object.
 
 ```{r}
 cwlSearch("counts2sce")  ## need to load the Bioconductor package: DropletUtils
@@ -309,11 +283,54 @@ res <- runCWL(counts2sce, outdir = file.path(outpath, "counts2sce_output"),
               docker = TRUE, showLog = TRUE)
 ```
 
+We can then load the output file into R as a `SingleCellExperiment` object,
+and proceed with any downstream exploratory analysis.
+
+```{r}
+sce <- readRDS(res$output)
+sce
+```
+
 ```{r}
 dir(file.path(outpath, "counts2sce_output"))
 sce <- readRDS(res$output)
 sce
 ```
+
+**NOTE** that the integration of _R_ packages or _R_ functions as a
+CWL tool or pipeline is only supported in `Rcwl`, but not the original
+format of `CWL`. this is a unique feature for `Rcwl`, where we can
+easily connect the upstream data preprocessing steps (previously based
+on command line tools) and the downstream data analysis steps (heavily
+done in _R/Bioconductor_).
+
+The idea here is to put anything you need into a user-defined _R_
+function, with specified arguments for input and output files, then
+it's ready to be wrapped as an `Rcwl` tools for execution.
+
+
+## scRNA-seq preprocessing pipeline
+
+Instead of running the tools separately, alternatively and more
+easily, we can use the pipeline called `pl_STARsolo2sce` (recipe
+[here](https://github.com/rworkflow/RcwlRecipes/blob/dev/Rcwl/pl_STARsolo2sce.R)
+for the scRNA-seq data preprocessing. This pipeline integrated the
+`STARsolo` and `DropletUtils` (Bioc package) for a streamlined
+preprocessing analysis within _R_. It is included in `RcwlPipelines`
+and is ready to be customized for your own research. Pipelines can be
+visualized by the `plotCWL` function.
+
+```{r}
+STARsolo2sce <- cwlLoad("pl_STARsolo2sce")
+```
+```{r, warning=FALSE}
+plotCWL(STARsolo2sce)
+```
+
+For `Rcwl` pipelines, we only need to assign input values for the
+whole pipeline, not individual tools involved. The input and output
+between each step are pre-defined in the pipeline to ensure a smooth
+passing. 
 
 ```{r}
 cwlSearch("STARsolo2sce")
@@ -330,109 +347,100 @@ res <- runCWL(STARsolo2sce, outdir = file.path(outpath, "STARsolo2sce_output"),
               docker = TRUE, showLog = TRUE)
 ```
 
+## Customization of existing tools/pipelines
 
-### Count filtering
-
-To get a high-quality count matrix we apply the `DropletUtils`
-_Bioconductor_ package, which will produce a filtered dataset that is
-more representative of the `Cell Ranger` pipeline.
-
-Since CWL itself doesn't support the integration of _R_ packages or
-_R_ function, this is a unique feature for `Rcwl`, where we can easily
-connect the upstream data preprocessing steps (previously based on
-command line tools) and the downstream data analysis steps (heavily
-done in _R/Bioconductor_).
-
-The idea here is to put anything you need into a user-defined _R_
-function, with specified arguments for input and output files, then
-it's ready to be wrapped as an `Rcwl` tools for execution.
-
-For example, in wrapping the _Bioconductor_ package
-[DropletUtils](https://bioconductor.org/packages/DropletUtils/)
-functionalities, we wrote this `Rcwl` tool called
-[tl_DropletUtils](https://github.com/rworkflow/RcwlRecipes/blob/dev/Rcwl/tl_DropletUtils.R)
-with 3 major steps: 1) use the `read10xCounts` function to read the
-raw aligned files and convert into a `SingleCellExperiment` object. 2)
-calculate the barcode ranks and plotting. 3) calculate the empty
-droplets and plotting. We have also defined the tool output to collect
-the `SingleCellExperiment` Rdata file and diagnostic figures pdf file.
+Some utility functions can be used to check specific entry or modify
+ the existing tools/pipelines. 
 
 ```{r}
-library(DropletUtils)
-
-inputs(DropletUtils)
-DropletUtils$dirname <- file.path(outpath, "STARsolo_output/Solo.out")
-DropletUtils$lower <- 100
-DropletUtils$df <- 5
+cwlVersion(STARsolo)
+baseCommand(STARsolo)
+requirements(STARsolo)
+requirements(STARsolo2sce, step = "STARsolo")
+arguments(STARsolo)
+inputs(STARsolo)
 ```
 
-```{r, eval=FALSE}
-res <- runCWL(DropletUtils, outdir = file.path(outpath, "dropletUtils_output"),
-              docker = TRUE, showLog = TRUE)
+Change docker container version: 
+
+```{r}
+star_v <- searchContainer("STAR")
+requirements(STARsolo2sce, step = "STARsolo")
+requirements(STARsolo2sce, "STARsolo") <- list(requireDocker(star_v$container[2]))
+requirements(STARsolo2sce, step = "STARsolo")
+```
+
+Change default argument values: 
+
+```{r}
+arguments(STARsolo)
+```
+
+# Rcwl: Build `Rcwl` tools
+
+Here we show some basic usage of the `Rcwl` functions to wrap
+command-line tools, bash scripts and R functions. 
+
+```{r}
+library(Rcwl)
+```
+
+## echo: hello world
+
+```{r}
+input1 <- InputParam(id = "sth", type = "string")
+echo <- cwlProcess(baseCommand = "echo", inputs = InputParamList(input1))
+echo
+```
+
+Then the tools is successfully wrapped and ready to be used in
+_R_. We'll just need to assign values for the tool parameters and
+submit the job.
+
+```{r}
+echo$sth <- "Hello World!"
+r1 <- runCWL(echo, outdir = tempdir(), showLog = TRUE)
+readLines(r1$output)
+```
+
+## wrap bash script
+
+```{r}
+script <- "
+sth=$1
+echo hello $sth !
+"
+p1 <- InputParam(id = "sth", type = "string", position = 1)
+req1 <- requireShellScript(script)
+echo_b <- cwlProcess(baseCommand = ShellScript(),
+                     requirements = list(req1),
+                     inputs = InputParamList(p1))
 ```
 
 ```{r}
-dir(file.path(outpath, "dropletUtils_output"))
+echo_b$sth <- "World"
+r2 <- runCWL(echo_b, outdir = tempdir(), showLog = TRUE)
+readLines(r2$output)
 ```
 
-We can then load the output file into R as a `SingleCellExperiment` object,
-and proceed with any downstream exploratory analysis.
+## wrap R function
 
 ```{r}
-sce <- readRDS(file.path(outpath, "dropletUtils_output/counts_sce.rds"))
-sce
+Echo <- function(sth){
+    return(paste("Hello", sth))
+}
+
+p1 <- InputParam(id = "sth", type = "string", position = 1)
+echo_r <- cwlProcess(baseCommand = Echo, inputs = InputParamList(p1))
 ```
-
-### scRNA-seq preprocessing pipeline
-
-Alternatively and more easily, we can use the pipeline called
-`pl_STARsoloDropletUtils` (recipe
-[here](https://github.com/rworkflow/RcwlRecipes/blob/dev/Rcwl/pl_STARsoloDropletUtils.R)
-for the scRNA-seq data preprocessing. This pipeline integrated the
-`STARsolo` and `DropletUtils` for a streamlined preprocessing analysis
-within _R_. It is included in `RcwlPipelines` and is ready to be
-customized for your own research. Pipelines can be visualized by the
-`plotCWL` function.
 
 ```{r}
-STARsoloDropletUtils <- cwlLoad("pl_STARsoloDropletUtils")
-```
-```{r, warning=FALSE}
-plotCWL(STARsoloDropletUtils)
-```
-
-<!-- ```{r fig2, fig.show = "workflow", out.width = "100%", echo = FALSE} -->
-<!-- knitr::include_graphics("workflow.png") -->
-<!-- ``` -->
-
-For `Rcwl` pipelines, we only need to assign input values for the
-whole pipeline, not individual tools involved. The input and output
-between each step are pre-defined in the pipeline to ensure a smooth
-passing. 
-
-```{r}
-inputs(STARsoloDropletUtils)
-STARsoloDropletUtils$fastq_cdna <- cdna.fastq
-STARsoloDropletUtils$fastq_cb <- cb.fastq
-STARsoloDropletUtils$genomeDir <- file.path(outpath, "STARindex_output/STARindex")
-STARsoloDropletUtils$whiteList <- cblist
-STARsoloDropletUtils$runThreadN <- 1
+echo_r$sth <- "World"
+r3 <- runCWL(echo_r, outdir = tempdir(), showLog = TRUE)
+readLines(r3$output)
 ```
 
-```{r, eval=FALSE}
-res <- runCWL(STARsoloDropletUtils, outdir = file.path(outpath, "scpipeline_output"),
-              docker = TRUE, showLog = TRUE)
-```
-
-The overall output of the pipeline was pre-defined to glob the
-important files from separate steps.
-
-```{r}
-outputs(STARsoloDropletUtils)
-dir(file.path(outpath, "scpipeline_output"), recursive = TRUE)
-```
-
-### Submit parallel jobs for `STARsolo`
+# Extension: Submit parallel jobs for `STARsolo`
 
 Powered by `BiocParallel`,`Rcwl` supports parallel job running for
 multiple samples using the `runCWLBatch` function. The following
@@ -495,23 +503,6 @@ The results are saved in separate folders for each parallel sample.
 dir(file.path(outpath, "STARsolo_batch_output"), recursive = TRUE)  ## output files
 ```
 
-### Shiny interface
-
-`cwlShiny()` opens a user-friendly shiny interface for running any
-`Rcwl` tools or pipelines. By default, users need to put in the
-absolute file path for each input parameter. **NOTE**, multiple file
-paths need to be separated by colon. Click the `run` button, it will
-start running and return the output file paths under `Output`
-tag. Users can also check the `Command` and `Log` in the shiny
-interface page.
-
-```{r, eval=FALSE}
-cwlShiny(STARsolo)
-```
-```{r fig3, fig.show = "hold", out.width = "100%", echo = FALSE}
-knitr::include_graphics("cwlShiny_STARsolo.png")
-```
-
 ## SessionInfo
 
 ```{r}
@@ -520,5 +511,4 @@ sessionInfo()
 
 ## Links
 
-1. [GitHub repository](https://github.com/rworkflow/Rcwl_scRNAseq) for the workshop materials and instructions. 
-2. [YouTube link](https://youtu.be/5jkJAfkjFGo) for the Rcwl workshop on BioCAsia2020.
+1. [GitHub repository](https://github.com/rworkflow/Bioc2022_Rcwl_demo) for the workshop materials and instructions. 
