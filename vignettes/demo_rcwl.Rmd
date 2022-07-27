@@ -301,7 +301,8 @@ file and diagnostic figures pdf file.
 cwlSearch("counts2sce")  ## need to load the Bioconductor package: DropletUtils
 counts2sce <- cwlLoad("tl_counts2sce")
 inputs(counts2sce)
-DropletUtils$dirname <- file.path(outpath, "STARsolo_output/Solo.out/Gene/filtered")
+counts2sce$dirname <- file.path("~/workspace/STARsolo_output/Solo.out")
+## counts2sce$dirname <- file.path(outpath, "STARsolo_output/Solo.out")
 ```
 
 ```{r, eval=FALSE}
@@ -311,9 +312,19 @@ res <- runCWL(counts2sce, outdir = file.path(outpath, "counts2sce_output"),
 
 ```{r}
 dir(file.path(outpath, "counts2sce_output"))
+sce <- readRDS(res$output)
 ```
 
+```{r}
+inputs(STARsolo2sce)
+STARsolo2sce$readFilesIn_cdna <- cdna.fastq
+STARsolo2sce$readFilesIn_cb <- cb.fastq
+STARsolo2sce$whiteList <- cblist
+STARsolo2sce$genomeDir <- "~/workspace/STARindex_output"
+STARsolo2sce$soloCellFilter <- "EmptyDrops_CR"
 
+res <- runCWL(STARsolo2sce, outdir = file.path(outpath, "STARsolo2sce_output"),
+              docker = TRUE, showLog = TRUE)
 ```
 
 
