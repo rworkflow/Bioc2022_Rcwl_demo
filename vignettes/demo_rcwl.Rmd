@@ -1,5 +1,5 @@
 ---
-title: "Connecting Bioconductor to other bioinformatics tools using Rcwl - Application in scRNA-seq data"
+title: "Rcwl/RcwlPipelines: Use R To Build, Read, Write, And execute CWL Workflows"
 output:
   rmarkdown::html_document:
     highlight: pygments
@@ -16,15 +16,19 @@ vignette: >
 knitr::opts_chunk$set(message = FALSE)
 ```
 
-## Instructor(s) name(s) and contact information
+# Instructor(s) name(s) and contact information
 
 * [Qian Liu](https://github.com/liubuntu) (Qian.Liu@roswellpark.org)
-* [Qiang Hu](https://github.com/hubentu) (Qiang.Hu@roswellpark.org)
+
+
+In this workshop, we will first demonstrate how to use (search, load,
+customize, and execute) the pre-built CWL tools and pipelines in `R`,
+using a case study for scRNA-seq data preprocessing. Then I'll use
+some example code to demonstrate how to build Rcwl tool or pipeline. 
+
+# RcwlPipelines: Use pre-built Rcwl tools and pipelines
 
 ## Introduction
-
-Here we demonstrate a case study for scRNA-seq data preprocessing
-using `RcwlPipelines` tools and pipeline.
 
 10x Genomics has its own preprocessing pipeline `Cell Ranger` to
 process the scRNA-seq outputs it produces to perform the
@@ -57,12 +61,6 @@ BiocManager::install(c("Rcwl", "RcwlPipelines"))
 BiocManager::install("DropletUtils")
 ```
 
-For this tutorial, please use the most updated version from GitHub:
-
-```{r, eval=FALSE}
-BiocManager::install(c("rworkflow/Rcwl", "rworkflow/RcwlPipelines"))
-```
-
 Several other packages need to be installed also: 
 
 ```{r, eval=FALSE}
@@ -74,6 +72,7 @@ Load the packages:
 ```{r}
 library(Rcwl)
 library(RcwlPipelines)
+library(DropletUtils)
 ```
 
 ## scRNA-seq data source
@@ -121,7 +120,7 @@ outpath <- "outdir"
 dir.create(outpath, showWarnings = FALSE)
 ``` 
 
-### Load scRNA-seq pre-processing tools
+## Load scRNA-seq pre-processing tools
 
 Three core functions: `cwlUpdate`, `cwlSearch` and `cwlLoad`from
 `RcwlPipelines` will be needed for updating, searching, and loading
@@ -187,6 +186,7 @@ the next tool for single cell read alignment.
 Assign values to the input parameters: 
 
 ```{r, eval=FALSE}
+inputs(STARindex)
 STARindex$genomeFastaFiles <- file.path(path, "chr21.fa")
 STARindex$sjdbGTFfile <- file.path(path, "Homo_sapiens.GRCh37.75.21.gtf")
 ```
@@ -213,16 +213,21 @@ privileges.
 
 ### Alignment, demultiplexing and quantification
 
-Then we STARsolo to map, demultiplex and quantify the indexed scRNAseq data. 
+Then we STARsolo to map, demultiplex and quantify the indexed scRNAseq
+data. Since [STAR
+2.7.8a](https://github.com/alexdobin/STAR/blob/master/docs/STARsolo.md),
+STARsolo performs cell filtering (a.k.a. cell calling), which aims to
+select a subset of cells that are likely to be "real" cells as opposed
+to empty droplets (containing ambient RNA).
 
-Load the tool: 
+First load the tool:
 
 ```{r}
 cwlSearch(c("STAR", "solo"))
 STARsolo <- cwlLoad("tl_STARsolo")
 ```
 
-Assign values to input parameters:
+Then we assign values to input parameters:
 
 ```{r}
 cdna.fastq <- file.path(path, list.files(path, pattern = "_R2_"))
@@ -237,27 +242,79 @@ STARsolo$whiteList <- cblist
 STARsolo$genomeDir <- genomeDir
 STARsolo$soloCellFilter <- "EmptyDrops_CR"
 ```
+
+Then we submit it as an CWL job. 
+
 ```{r, eval=FALSE}
 res <- runCWL(STARsolo, outdir = file.path(outpath, "STARsolo_output"),
               docker = TRUE, showLog = TRUE)
 ```
 
-Now let's check all the output files generated in the "STARsolo_output" folder, which are ready to be passed into the next analysis steps. A summary table is generated for filtered cells ("Summary.csv"), which is similar to CellRanger's summary and is useful for Quality Control.
+Now let's check all the output files generated in the
+"STARsolo_output" folder, which are ready to be passed into the next
+analysis steps. A summary table is generated for filtered cells
+("Summary.csv"), which is similar to CellRanger's summary and is
+useful for Quality Control.
 
 ```{r}
 dir(file.path(outpath, "STARsolo_output"), recursive = TRUE)
 read.csv(file.path(outpath, "STARsolo_output/Solo.out/Gene/Summary.csv"))
 ```
 
-### Import data into R 
+<!-- ## Import data into R  -->
 
-We then load the data into R environment in `singlecellExperiment` format. 
+<!-- After the scRNAseq data preprocessing steps are done, We can load the -->
+<!-- result data into R environment in `singlecellExperiment` format, and -->
+<!-- proceed with any downstream data exploration. -->
+
+<!-- ```{r} -->
+<!-- library(DropletUtils) -->
+<!-- sce <- read10xCounts(file.path(outpath, "STARsolo_output/Solo.out/Gene/filtered")) -->
+<!-- sce -->
+<!-- ``` -->
+
+### Import count data into R
+
+`Rcwl` it support the integration of _R_ packages or _R_ functions as
+a CWL tool or pipeline, which was not intrinsically supported when
+directly using CWL. this is a unique feature for `Rcwl`, where we can
+easily connect the upstream data preprocessing steps (previously based
+on command line tools) and the downstream data analysis steps (heavily
+done in _R/Bioconductor_).
+
+The idea here is to put anything you need into a user-defined _R_
+function, with specified arguments for input and output files, then
+it's ready to be wrapped as an `Rcwl` tools for execution.
+
+You can refer to this `Rcwl` tool called
+[tl_DropletUtils](https://github.com/rworkflow/RcwlRecipes/blob/dev/Rcwl/tl_DropletUtils.R)
+as an example, where it wrapped the _Bioconductor_ package
+[DropletUtils](https://bioconductor.org/packages/DropletUtils/)
+functionalities, with 3 major steps: 1) use the `read10xCounts`
+function to read the raw aligned files and convert into a
+`SingleCellExperiment` object. 2) calculate the barcode ranks and
+plotting. 3) calculate the empty droplets and plotting. We have also
+defined the tool output to collect the `SingleCellExperiment` Rdata
+file and diagnostic figures pdf file.
 
 ```{r}
-library(DropletUtils)
-sce <- read10xCounts(file.path(outpath, "STARsolo_output/Solo.out/Gene/filtered"))
+cwlSearch("counts2sce")  ## need to load the Bioconductor package: DropletUtils
+counts2sce <- cwlLoad("tl_counts2sce")
+inputs(counts2sce)
+DropletUtils$dirname <- file.path(outpath, "STARsolo_output/Solo.out/Gene/filtered")
 ```
 
+```{r, eval=FALSE}
+res <- runCWL(counts2sce, outdir = file.path(outpath, "counts2sce_output"),
+              docker = TRUE, showLog = TRUE)
+```
+
+```{r}
+dir(file.path(outpath, "counts2sce_output"))
+```
+
+
+```
 
 
 ### Count filtering
@@ -288,6 +345,7 @@ the `SingleCellExperiment` Rdata file and diagnostic figures pdf file.
 
 ```{r}
 library(DropletUtils)
+
 inputs(DropletUtils)
 DropletUtils$dirname <- file.path(outpath, "STARsolo_output/Solo.out")
 DropletUtils$lower <- 100
@@ -303,29 +361,17 @@ res <- runCWL(DropletUtils, outdir = file.path(outpath, "dropletUtils_output"),
 dir(file.path(outpath, "dropletUtils_output"))
 ```
 
-Now that we get 2 output files:
-
-1. The pdf file with 2 diagnostic figures: Barcode ranks, and empty
-   droplets. For details regarding interpretation of each diagnostic
-   figure, please refer to the [DropletUtils
-   vignette](https://bioconductor.org/packages/release/bioc/vignettes/DropletUtils/inst/doc/DropletUtils.html).
-
-```{r fig1, fig.show = "hold", out.width = "60%", echo = FALSE}
-knitr::include_graphics("diag1.png")
-knitr::include_graphics("diag2.png")
-```
-
-```{r, eval=FALSE}
-Biobase::openPDF(file.path(outpath, "dropletUtils_output/diagnostics.pdf"))
-```
-
-2. The `SingleCellExperiment` object which has filtered out
-   unqualified cells and is analysis ready.
+We can then load the output file into R as a `SingleCellExperiment` object,
+and proceed with any downstream exploratory analysis.
 
 ```{r}
-sce <- readRDS(file.path(outpath, "dropletUtils_output/sce_filtered.rds"))
+sce <- readRDS(file.path(outpath, "dropletUtils_output/counts_sce.rds"))
 sce
 ```
+
+
+
+
 
 ### scRNA-seq preprocessing pipeline
 
