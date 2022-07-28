@@ -120,7 +120,7 @@ Here we also create an output directory to save result files from
 running the tool/pipeline.
 
 ```{r}
-outpath <- "outdir" 
+outpath <- "outdir2" 
 dir.create(outpath, showWarnings = FALSE)
 ``` 
 
@@ -138,7 +138,7 @@ users don't need to call `cwlUpdate` every time unless they want to
 use a tool/pipeline that is newly added to `RcwlPipelines`. 
 
 ```{r}
-atls <- cwlUpdate(branch = "dev") ## sync the tools/pipelines. 
+atls <- cwlUpdate() ## sync the tools/pipelines. 
 atls
 table(mcols(atls)$Type)
 ```
@@ -150,7 +150,6 @@ interest. Multiple keywords can be used for an internal search of
 
 ```{r}
 tls <- cwlSearch(c("STAR", "index"))
-mcols(tls)
 ```
 
 `cwlLoad` loads the `Rcwl` tool/pipeline into the _R_ working
